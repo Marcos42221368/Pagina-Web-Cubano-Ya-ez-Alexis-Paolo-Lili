@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tienda Mundial • Playeras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true"></div>
+
+  
+  <div class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">✦</div>
+        <div>
+          Tienda Mundial ⚽
+          <div style="font-size:12.5px;color:var(--muted);font-weight:700;margin-top:2px;">
+            Playeras de fútbol • Carrito
+          </div>
+        </div>
+      </div>
+
+      <div class="nav" aria-label="Navegación por países">
+        <a href="#arg">Argentina</a>
+        <a href="#esp">España</a>
+        <a href="#fra">Francia</a>
+        <a href="#bra">Brasil</a>
+        <a href="#ger">Alemania</a>
+        <a href="#ita">Italia</a>
+        <a href="#por">Portugal</a>
+
+        <button class="cart-btn" id="openCart" type="button" aria-label="Abrir carrito">
+          <span>🛒 Carrito</span>
+          <span class="badge" id="cartCount">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero-card">
+        <h1>Playeras por país 🌍</h1>
+        <p>
+          Elige una playera, selecciona <b>talla</b> y <b>cantidad</b>, y agrégala al carrito.
+        </p>
+
+        <div class="search-row">
+          <input id="searchInput" class="search" placeholder="Buscar: Argentina, Local, Portero, etc." />
+          <button class="btn" id="clearSearch" type="button">Limpiar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    
+    <section class="section" id="arg">
+      <div class="section-title">
+        <h2>🇦🇷 Argentina</h2>
+        <div class="meta" id="meta-arg"></div>
+      </div>
+      <div class="grid" data-country="Argentina"></div>
+    </section>
+
+    <section class="section" id="esp">
+      <div class="section-title">
+        <h2>🇪🇸 España</h2>
+        <div class="meta" id="meta-esp"></div>
+      </div>
+      <div class="grid" data-country="España"></div>
+    </section>
+
+    <section class="section" id="fra">
+      <div class="section-title">
+        <h2>🇫🇷 Francia</h2>
+        <div class="meta" id="meta-fra"></div>
+      </div>
+      <div class="grid" data-country="Francia"></div>
+    </section>
+
+    <section class="section" id="bra">
+      <div class="section-title">
+        <h2>🇧🇷 Brasil</h2>
+        <div class="meta" id="meta-bra"></div>
+      </div>
+      <div class="grid" data-country="Brasil"></div>
+    </section>
+
+    <section class="section" id="ger">
+      <div class="section-title">
+        <h2>🇩🇪 Alemania</h2>
+        <div class="meta" id="meta-ger"></div>
+      </div>
+      <div class="grid" data-country="Alemania"></div>
+    </section>
+
+    <section class="section" id="ita">
+      <div class="section-title">
+        <h2>🇮🇹 Italia</h2>
+        <div class="meta" id="meta-ita"></div>
+      </div>
+      <div class="grid" data-country="Italia"></div>
+    </section>
+
+    <section class="section" id="por">
+      <div class="section-title">
+        <h2>🇵🇹 Portugal</h2>
+        <div class="meta" id="meta-por"></div>
+      </div>
+      <div class="grid" data-country="Portugal"></div>
+    </section>
+  </main>
+
+  
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer" aria-label="Carrito">
+    <div class="drawer-header">
+      <h3>🛒 Tu carrito</h3>
+      <button class="close" id="closeCart" type="button" aria-label="Cerrar carrito">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="empty" id="cartEmpty">Tu carrito está vacío 😄</div>
+      <div id="cartItems" style="display:none;"></div>
+    </div>
+
+    <div class="totals">
+      <div class="row"><span>Subtotal</span><strong id="cartSubtotal">$0.00</strong></div>
+      <div class="row"><span>Envío</span><strong id="cartShipping">$0.00</strong></div>
+      <div class="row"><span>Total</span><strong id="cartTotal">$0.00</strong></div>
+      <button class="checkout" id="checkoutBtn" type="button">✅ Finalizar compra</button>
+      <div class="note">Compra simulada: el carrito se vacía al finalizar.</div>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+
+
+
+    const money = (n) => n.toLocaleString("es-ES", { style:"currency", currency:"USD" });
+    const $ = (q) => document.querySelector(q);
+
+
+
+
+    const products = [
+
+  { id:"arg-1", country:"Argentina", style:"Local", price:59.99, badge:"AFA", img:"img/arg-1.jpg", desc:"Rayas clásicas con colores." },
+  { id:"arg-2", country:"Argentina", style:"Visita", price:61.99, badge:"AFA Away", img:"img/arg-2.jpg", desc:"Estilo alterno con detalles." },
+  { id:"arg-3", country:"Argentina", style:"Edición Copa", price:74.99, badge:"Copa", img:"img/arg-3.jpg", desc:"Colores destacados y look premium." },
+  { id:"arg-4", country:"Argentina", style:"Portero", price:68.50, badge:"Arquero", img:"img/arg-4.jpg", desc:"Diseño vibrante para arquero." },
+
+  { id:"esp-1", country:"España", style:"Local", price:58.99, badge:"RFEF", img:"img/esp-1.jpg", desc:"Rojo con acentos elegantes." },
+  { id:"esp-2", country:"España", style:"Visita", price:60.99, badge:"Away", img:"img/esp-2.jpg", desc:"Azul eléctrico y contraste." },
+  { id:"esp-3", country:"España", style:"Edición Mundial", price:72.99, badge:"Mundial", img:"img/esp-3.jpg", desc:"Blanco con detalles modernos." },
+  { id:"esp-4", country:"España", style:"Portero", price:66.50, badge:"GK", img:"img/esp-4.jpg", desc:"Verde y negro con personalidad." },
+
+  { id:"fra-1", country:"Francia", style:"Local", price:59.49, badge:"FFF", img:"img/fra-1.jpg", desc:"Azul con look atlético." },
+  { id:"fra-2", country:"Francia", style:"Visita", price:62.99, badge:"Away", img:"img/fra-2.jpg", desc:"Amarillo con detalles." },
+  { id:"fra-3", country:"Francia", style:"Edición Tricolor", price:75.00, badge:"Tricolor", img:"img/fra-3.jpg", desc:"Tramas con estética vibrante." },
+  { id:"fra-4", country:"Francia", style:"Portero", price:69.25, badge:"GK", img:"img/fra-4.jpg", desc:"Azul claro con estilo." },
+
+  { id:"bra-1", country:"Brasil", style:"Local", price:57.99, badge:"CBF", img:"img/bra-1.jpg", desc:"Verde vibrante y moderno." },
+  { id:"bra-2", country:"Brasil", style:"Visita", price:63.49, badge:"Away", img:"img/bra-2.jpg", desc:"Amarillo con acentos." },
+  { id:"bra-3", country:"Brasil", style:"Edición Seleção", price:74.49, badge:"Seleção", img:"img/bra-3.jpg", desc:"Detalle rojo/negro con carácter." },
+  { id:"bra-4", country:"Brasil", style:"Portero", price:67.90, badge:"GK", img:"img/bra-4.jpg", desc:"Azul brillante para el arco." },
+
+  { id:"ger-1", country:"Alemania", style:"Local", price:59.99, badge:"DFB", img:"img/ger-1.jpg", desc:"Negro con rojo/dorado." },
+  { id:"ger-2", country:"Alemania", style:"Visita", price:61.50, badge:"Away", img:"img/ger-2.jpg", desc:"Amarillo con cortes." },
+  { id:"ger-3", country:"Alemania", style:"Edición Élite", price:76.99, badge:"Élite", img:"img/ger-3.jpg", desc:"Azul con franja y look premium." },
+  { id:"ger-4", country:"Alemania", style:"Portero", price:68.25, badge:"GK", img:"img/ger-4.jpg", desc:"Verde intenso con contraste." },
+
+  { id:"ita-1", country:"Italia", style:"Local", price:58.49, badge:"FIGC", img:"img/ita-1.jpg", desc:"Azul y blanco con estilo." },
+  { id:"ita-2", country:"Italia", style:"Visita", price:62.99, badge:"Away", img:"img/ita-2.jpg", desc:"Dorado y negro con carácter." },
+  { id:"ita-3", country:"Italia", style:"Edición Azzurri", price:74.99, badge:"Azzurri", img:"img/ita-3.jpg", desc:"Cyan y líneas con identidad." },
+  { id:"ita-4", country:"Italia", style:"Portero", price:67.50, badge:"GK", img:"img/ita-4.jpg", desc:"Rosa/rojo para arquero." },
+
+  { id:"por-1", country:"Portugal", style:"Local", price:59.29, badge:"FPF", img:"img/por-1.jpg", desc:"Azul con detalles." },
+  { id:"por-2", country:"Portugal", style:"Visita", price:63.99, badge:"Away", img:"img/por-2.jpg", desc:"Azul claro y blanco." },
+  { id:"por-3", country:"Portugal", style:"Edición Navegadores", price:75.49, badge:"Navegadores", img:"img/por-3.jpg", desc:"Verde/teal premium." },
+  { id:"por-4", country:"Portugal", style:"Portero", price:68.75, badge:"GK", img:"img/por-4.jpg", desc:"Amarillo para arquero." },
+];
+
+
+
+    const byCountry = {};
+    for (const p of products) {
+      (byCountry[p.country] ||= []).push(p);
+    }
+
+    const metaMap = {
+      "Argentina":"meta-arg",
+      "España":"meta-esp",
+      "Francia":"meta-fra",
+      "Brasil":"meta-bra",
+      "Alemania":"meta-ger",
+      "Italia":"meta-ita",
+      "Portugal":"meta-por",
+    };
+
+    for (const [country, arr] of Object.entries(byCountry)) {
+      const metaId = metaMap[country];
+      const metaEl = document.getElementById(metaId);
+      if (metaEl) metaEl.textContent = `${arr.length} productos`;
+
+      const grid = document.querySelector(`.grid[data-country="${country}"]`);
+      if (!grid) continue;
+
+      grid.innerHTML = arr.map(p => `
+        <article class="card" data-id="${p.id}">
+          <div class="card-top">
+            <div class="tag">
+              <span aria-hidden="true">🏟️</span>
+              <span>${p.country}</span>
+            </div>
+            <div class="price">${money(p.price)}</div>
+          </div>
+
+          <div class="img-wrap">
+            <img
+              src="${p.img}"
+              alt="Playera ${p.country} (${p.style})"
+              onerror="this.style.opacity=.35; this.alt='Imagen no disponible';"
+            />
+          </div>
+
+          <div class="card-body">
+            <h3 class="title">${p.style} • ${p.country}</h3>
+            <p class="desc">${p.desc}</p>
+
+            <div class="row2">
+              <select class="size" data-size aria-label="Talla">
+                <option value="S">S</option>
+                <option value="M" selected>M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+              </select>
+
+              <div>
+                <div class="qtyRow">
+                  <button class="step" type="button" data-qty-minus="-1">-</button>
+                  <input class="qtyInput" type="number" value="1" min="1" max="9" step="1" data-qty />
+                  <button class="step" type="button" data-qty-plus="1">+</button>
+                </div>
+              </div>
+            </div>
+
+            <button class="add" type="button" data-add data-id="${p.id}">
+              Añadir al carrito ➕
+            </button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+
+
+    const state = { cart: [] }; // {id,size,qty,price,name,img,country,style}
+
+    const cartCountEl = document.getElementById("cartCount");
+    const drawer = document.getElementById("drawer");
+    const overlay = document.getElementById("overlay");
+    const openCart = document.getElementById("openCart");
+    const closeCart = document.getElementById("closeCart");
+
+    const cartItemsEl = document.getElementById("cartItems");
+    const cartEmptyEl = document.getElementById("cartEmpty");
+
+    const subtotalEl = document.getElementById("cartSubtotal");
+    const shippingEl = document.getElementById("cartShipping");
+    const totalEl = document.getElementById("cartTotal");
+
+    const toastEl = document.getElementById("toast");
+    let toastTimer = null;
+
+    function showToast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+    }
+
+    function cartKey(id,size){ return `${id}__${size}`; }
+
+    function calcTotals(){
+      const subtotal = state.cart.reduce((s, it) => s + it.qty * it.price, 0);
+      const shipping = subtotal > 0 ? 6.99 : 0;
+      return { subtotal, shipping, total: subtotal + shipping };
+    }
+
+    function renderCart(){
+      const count = state.cart.reduce((s,it)=>s+it.qty,0);
+      cartCountEl.textContent = count;
+
+      if(state.cart.length === 0){
+        cartEmptyEl.style.display = "block";
+        cartItemsEl.style.display = "none";
+      }else{
+        cartEmptyEl.style.display = "none";
+        cartItemsEl.style.display = "block";
+      }
+
+      const { subtotal, shipping, total } = calcTotals();
+      subtotalEl.textContent = money(subtotal);
+      shippingEl.textContent = money(shipping);
+      totalEl.textContent = money(total);
+
+      cartItemsEl.innerHTML = state.cart.map(it => `
+        <div class="cart-item">
+          <div class="thumb">
+            <img src="${it.img}" alt="Imagen de ${it.name}" onerror="this.style.opacity=.35" />
+          </div>
+          <div style="flex:1;min-width:180px">
+            <p class="ci-name">${it.name}</p>
+            <div class="ci-meta">
+              Talla: <b>${it.size}</b><br/>
+              Precio unitario: <b>${money(it.price)}</b>
+            </div>
+
+            <div class="ci-actions">
+              <div class="qtyRow">
+                <button class="step" type="button" data-dec="${it.id}" data-size="${it.size}">-</button>
+                <div style="min-width:44px;text-align:center;font-weight:1000">${it.qty}</div>
+                <button class="step" type="button" data-inc="${it.id}" data-size="${it.size}">+</button>
+              </div>
+              <button class="danger" type="button" data-remove="${it.id}" data-size="${it.size}">
+                Quitar
+              </button>
+            </div>
+
+            <div style="margin-top:8px;color:var(--muted);font-size:13px">
+              Total línea: <b style="color:rgba(255,255,255,.95)">${money(it.qty * it.price)}</b>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      cartItemsEl.querySelectorAll("[data-remove]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-remove");
+          const size = btn.getAttribute("data-size");
+          state.cart = state.cart.filter(ci => !(ci.id===id && ci.size===size));
+          renderCart();
+          showToast("🗑️ Eliminado del carrito");
+        });
+      });
+
+      cartItemsEl.querySelectorAll("[data-inc]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-inc");
+          const size = btn.getAttribute("data-size");
+          const line = state.cart.find(ci => ci.id===id && ci.size===size);
+          if(!line) return;
+          line.qty = Math.min(9, line.qty + 1);
+          renderCart();
+        });
+      });
+
+      cartItemsEl.querySelectorAll("[data-dec]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.getAttribute("data-dec");
+          const size = btn.getAttribute("data-size");
+          const line = state.cart.find(ci => ci.id===id && ci.size===size);
+          if(!line) return;
+          line.qty = Math.max(1, line.qty - 1);
+          renderCart();
+        });
+      });
+    }
+
+    function openDrawer(){
+      drawer.classList.add("show");
+      overlay.classList.add("show");
+      renderCart();
+    }
+    function closeDrawer(){
+      drawer.classList.remove("show");
+      overlay.classList.remove("show");
+    }
+
+    openCart.addEventListener("click", openDrawer);
+    closeCart.addEventListener("click", closeDrawer);
+    overlay.addEventListener("click", closeDrawer);
+    document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeDrawer(); });
+
+
+
+    document.addEventListener("click", (e)=>{
+      const card = e.target.closest(".card");
+      if(!card) return;
+
+      const qtyInput = card.querySelector("[data-qty]");
+      if(e.target.matches('[data-qty-minus="-1"]')){
+        qtyInput.value = Math.max(1, (parseInt(qtyInput.value,10)||1) - 1);
+      }
+      if(e.target.matches('[data-qty-plus="1"]')){
+        qtyInput.value = Math.min(9, (parseInt(qtyInput.value,10)||1) + 1);
+      }
+
+      const addBtn = e.target.closest("[data-add]");
+      if(addBtn){
+        const id = addBtn.getAttribute("data-id");
+        const p = products.find(x=>x.id===id);
+        if(!p) return;
+
+        const size = card.querySelector("[data-size]").value;
+        const qty = Math.min(9, Math.max(1, parseInt(qtyInput.value,10)||1));
+
+        const key = cartKey(p.id, size);
+        const existing = state.cart.find(ci => cartKey(ci.id, ci.size) === key);
+
+        if(existing){
+          existing.qty = Math.min(9, existing.qty + qty);
+        }else{
+          state.cart.push({
+            id:p.id,
+            size,
+            qty,
+            price:p.price,
+            name:`${p.style} • ${p.country}`,
+            img:p.img
+          });
+        }
+
+        showToast(`✅ Agregado: ${qty} unidad(es) • Talla ${size}`);
+        openDrawer();
+      }
+    });
+
+    document.getElementById("checkoutBtn").addEventListener("click", ()=>{
+      if(state.cart.length === 0){
+        showToast("🛒 Tu carrito está vacío.");
+        return;
+      }
+      const { total } = calcTotals();
+      state.cart = [];
+      renderCart();
+      closeDrawer();
+      showToast(`🎉 ¡Gracias! Total: ${money(total)}.`);
+    });
+
+
+
+    const searchInput = document.getElementById("searchInput");
+    const clearBtn = document.getElementById("clearSearch");
+    const cards = Array.from(document.querySelectorAll(".card"));
+
+    function applyFilter(){
+      const q = (searchInput.value || "").trim().toLowerCase();
+      cards.forEach(card=>{
+        const id = card.getAttribute("data-id");
+        const p = products.find(x=>x.id===id);
+        if(!p) return;
+        const hay = `${p.country} ${p.style} ${p.desc} ${p.price}`.toLowerCase();
+        card.style.display = hay.includes(q) ? "" : "none";
+      });
+    }
+
+    searchInput.addEventListener("input", applyFilter);
+    clearBtn.addEventListener("click", ()=>{
+      searchInput.value = "";
+      applyFilter();
+    });
+
+    renderCart();
+  </script>
+</body>
+</html>
